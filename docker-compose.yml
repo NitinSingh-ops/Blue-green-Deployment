@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: bluegreen-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: bluegreen-backend
+    restart: unless-stopped
+    environment:
+      PORT: 5000
+      MONGO_URI: mongodb://mongodb:27017/bluegreen
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+
+  frontend-blue:
+    build: ./frontend-blue
+    container_name: bluegreen-frontend-blue
+    restart: unless-stopped
+    environment:
+      PORT: 3100
+    ports:
+      - "3100:3100"
+    depends_on:
+      - backend
+
+  frontend-green:
+    build: ./frontend-green
+    container_name: bluegreen-frontend-green
+    restart: unless-stopped
+    environment:
+      PORT: 3200
+    ports:
+      - "3200:3200"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
